@@ -17,5 +17,10 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.17"
   }
 }
