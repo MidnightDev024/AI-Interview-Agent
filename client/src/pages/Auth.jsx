@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { motion } from "motion/react"
 import { FaRobot } from "react-icons/fa";
 import { IoSparkles } from "react-icons/io5";
@@ -59,4 +59,4 @@ function Auth() {
   )
 }
 
-export default Auth
+export default Auth;

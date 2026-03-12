@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import { genToken } from "../utils/token.js";
 
 // frontend data
 
