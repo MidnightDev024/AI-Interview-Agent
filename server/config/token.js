@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 const genToken = async (userId) => {
     try {
