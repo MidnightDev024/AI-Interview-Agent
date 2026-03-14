@@ -1,10 +1,13 @@
 import React from 'react';
+import axios from "axios";
 import { motion } from "motion/react"
 import { FaRobot } from "react-icons/fa";
 import { IoSparkles } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../utils/firebase';
+
+const serverURL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 function Auth() {
 
@@ -14,13 +17,14 @@ function Auth() {
       let User = response.user
       let name = User.displayName
       let email = User.email
-      const result = await axios.post(ServerURL + "/api/auth/google", 
+      
+      const result = await axios.post(serverURL + "/api/auth/google",
         {name, email}, 
-        {withCredentials: true})
+        {withCredentials: true}
+      );
         console.log(result.data);
-        
     } catch (error) {
-      console.error(error.message);
+      console.error(error);
     }
   }
 
