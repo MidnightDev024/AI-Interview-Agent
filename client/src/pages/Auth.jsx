@@ -6,10 +6,15 @@ import { IoSparkles } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../utils/firebase';
+import { serverURL } from '../App.jsx';
+import { useDispatch } from 'react-redux';
+import { setUserData } from '../redux/userSlice.js'; 
 
-const serverURL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+// const serverURL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
 function Auth() {
+
+  const dispatch = useDispatch();
 
   const handleGoogleAuth = async () => {
     try {
@@ -22,9 +27,10 @@ function Auth() {
         {name, email}, 
         {withCredentials: true}
       );
-        console.log(result.data);
+      dispatch(setUserData(result.data));
     } catch (error) {
       console.error(error);
+      dispatch(setUserData(null));
     }
   }
 
