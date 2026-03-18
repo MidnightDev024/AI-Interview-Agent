@@ -27,6 +27,22 @@ function Navbar() {
                     </div>
                     <h1 className='font-semibold hidden md:Block text-lg'>EvalAI</h1>
                 </div>
+
+                <div className='flex items-center gap-6 relative'>
+                    <div className='relative'>
+                        <button className='flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-md hover:bg-gray-200 transition'>
+                            <BsCoin size={20} />
+                            {userData?.credits || 0}
+                        </button>
+                    </div>
+
+                    <div className='relative'>
+                        <button className='w-9 h-9 bg-black text-white rounded-full flex items-center justify-center font-semibold'>
+                            {userData ? userData?.name.slice(0,1).toUpperCase() : <FaUserAstronaut size={17} />}
+                        </button>
+                    </div>
+                </div>
+
             </motion.div>
         </div>
   )
