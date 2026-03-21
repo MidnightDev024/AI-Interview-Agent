@@ -1,0 +1,11 @@
+import React from 'react'
+
+const Step2SetUp = () => {
+  return (
+    <div>
+      
+    </div>
+  )
+}
+
+export default Step2SetUp

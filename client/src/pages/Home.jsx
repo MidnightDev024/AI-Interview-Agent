@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { delay, motion } from 'framer-motion'
@@ -278,7 +279,7 @@ function Home() {
 
       {showAuth && <AuthModel onClose={() => setShowAuth(false)} />}
 
-      
+      <Footer />
 
     </div>
   )
