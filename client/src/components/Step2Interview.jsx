@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Step2SetUp = () => {
+const Step2SetUp = ({interviewData, onFinish}) => {
   return (
     <div>
       

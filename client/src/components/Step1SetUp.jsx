@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Step1SetUp = () => {
+const Step1SetUp = ({onStart}) => {
   return (
     <div>
       
