@@ -49,11 +49,11 @@ function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{duration: 0.5}}
             className='w-full max-w-6px bg-white rounded-[24px] shadow-sm border border-gray-200 px-8 py-4 flex justify-between items-center relative'> 
-                <div className='flex gap-3 cursor-pointer'>
+                <div className='flex items-center gap-3 cursor-pointer'>
                     <div className='bg-black text-white p-2 rounded-lg'>
                         <BsRobot size={20} />
                     </div>
-                    <h1 className='font-semibold hidden md:Block text-lg'>EvalAI</h1>
+                    <h1 className='font-semibold hidden md:block text-lg'>EvalAI</h1>
                 </div>
 
                 <div className='flex items-center gap-6 relative'>
