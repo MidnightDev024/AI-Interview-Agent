@@ -48,7 +48,7 @@ function Navbar() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{duration: 0.5}}
-            className='w-full max-w-6px bg-white rounded-[24px] shadow-sm border border-gray-200 px-8 py-4 flex justify-between items-center relative'> 
+            className='w-full max-w-6xl bg-white rounded-[24px] shadow-sm border border-gray-200 px-8 py-4 flex justify-between items-center relative'> 
                 <div className='flex items-center gap-3 cursor-pointer'>
                     <div className='bg-black text-white p-2 rounded-lg'>
                         <BsRobot size={20} />
@@ -103,7 +103,7 @@ function Navbar() {
                                 </p>
                                 <button 
                                 onClick={() => navigate("/history")}
-                                className='w-full text-left text-sm py-2 hover-text-black text-gray-600'>
+                                className='w-full text-left text-sm py-2 hover:text-black text-gray-600'>
                                     Interview History
                                 </button>
                                 <button 
