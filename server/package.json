@@ -17,7 +17,9 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
-    "nodemon": "^3.1.14"
+    "multer": "^2.1.1",
+    "nodemon": "^3.1.14",
+    "pdfjs-dist": "^5.5.207"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
