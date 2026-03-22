@@ -1,5 +1,6 @@
 import fs from "fs";
 import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
+import { askAI } from "../utils/ai.js";
 
 export const analyzeResume = async (req, res) => {
     try {
@@ -25,9 +26,48 @@ export const analyzeResume = async (req, res) => {
 
         resumeText = resumeText.replace(/\s+/g, " ").trim();
 
-        
+        const messages = [
+            {
+                role: "system",
+                content: `Extract structured data from resumeText.
+                
+                Return strictly JSON:
+                
+                {
+                    "role": "string",
+                    "experience": "string",
+                    "projects": ["project1, project2, ..."],
+                    "skills": ["skill1, skill2, ..."],
+                }`
+            },
+            {
+                role: "user",
+                content: `Resume Text: ${resumeText}`
+            }
+        ];
+
+
+        const aiResponse = await askAI(messages)
+
+        const parsed = JSON.parse(aiResponse)
+
+        fs.unlinkSync(filepath);
+
+        res.json({
+            role: parsed.role,
+            experience: parsed.experience,
+            project: parsed.projects,
+            skills: parsed.skills,
+            resumeText
+        })
+
     } catch (error) {
         console.error("Error analyzing resume:", error);
-        return res.status(500).json({ message: "Error analyzing resume" });
+        
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        return res.status(500).json({ message: error.message });
     }
-}
+};
