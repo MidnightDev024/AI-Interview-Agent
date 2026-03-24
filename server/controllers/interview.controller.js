@@ -1,6 +1,6 @@
 import fs from "fs";
-import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
-import { askAI } from "../utils/ai.js";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { askAi } from "../services/openRouter.service.js";
 
 export const analyzeResume = async (req, res) => {
     try {
@@ -47,7 +47,7 @@ export const analyzeResume = async (req, res) => {
         ];
 
 
-        const aiResponse = await askAI(messages)
+    const aiResponse = await askAi(messages)
 
         const parsed = JSON.parse(aiResponse)
 

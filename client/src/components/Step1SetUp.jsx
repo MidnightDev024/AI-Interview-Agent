@@ -7,9 +7,20 @@ import {
   FaMicrophoneAlt,
   FaChartLine
 } from 'react-icons/fa';
+import { useState } from 'react';
 
 const Step1SetUp = ({onStart}) => {
 
+  const [role, setRole] = React.useState("");
+  const [experience, setExperience] = React.useState("");
+  const [mode, setMode] = React.useState("Technical");
+  const [resumeFile, setResumeFile] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [projects, setProjects] = React.useState([]);
+  const [skills, setSkills] = React.useState([]);
+  const [resumeText, setResumeText] = React.useState("");
+  const [analysisDone, setAnalysisDone] = React.useState(false);
+  const [analysing, setAnalysing] = React.useState(false);
 
   return (
     <motion.div 
@@ -70,8 +81,68 @@ const Step1SetUp = ({onStart}) => {
         </motion.div>
 
         {/* Right side */}
-        <motion.div>
+        <motion.div 
+        initial={{ x: 80, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.7 }}
+        className='p-12 bg-white'>
+          <h2 className='text-3xl font-boold text-gray-800 mb-8'>
+            Interview SetUp
+          </h2>
 
+          <div className='space-y-6'>
+            <div className='relative'>
+              <FaUserTie className='absolute top-4 left-4 text-gray-400' />
+              <input 
+              type="text" 
+              placeholder='Enter role' 
+              className='w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition' 
+              onChange={(e) => setRole(e.target.value)} 
+              value={role} />
+            </div>
+
+            <div className='relative'>
+              <FaBriefcase className='absolute top-4 left-4 text-gray-400' />
+              <input 
+              type="text" 
+              placeholder='Experience (e.g. 2 years)' 
+              className='w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition' 
+              onChange={(e) => setExperience(e.target.value)} 
+              value={experience} />
+
+            </div>
+
+            <select 
+              value={mode} 
+              onChange={(e) => setMode(e.target.value)}
+              className='w-full py-3 px-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition'>
+
+              <option value="Technical">Technical Interview</option>
+              <option value="HR">HR Interview</option>
+
+              </select>
+
+              {!analysisDone && (
+                <motion.div 
+                whileHover={{scale: 1.02}}
+                onClick={() => document.getElementById("resume-upload").click()}
+                className='border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 hover:bg-green-50 transition'> 
+                  <FaFileUpload 
+                  className='text-4xl mx-auto text-green-600 mb-3' />
+
+                  <input 
+                  accept='application/pdf'
+                  type="file" 
+                  id="resume-upload" 
+                  className='hidden'
+                  onChange={(e) => setResumeFile(e.target.files[0])}
+                  />
+                  <p 
+                  className='text-gray-500 font-medium'>
+                  {resumeFile ? resumeFile.name : "Click to upload resume (optional)"}</p>
+                </motion.div>
+              )}
+          </div>
         </motion.div>
       </div>
       
