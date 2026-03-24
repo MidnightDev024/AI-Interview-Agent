@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 import { setUserData } from './redux/userSlice.js'
 import InterviewPage from './pages/InterviewPage.jsx'
 
-export const serverURL = "http://localhost:5000"
+export const serverURL = import.meta.env.VITE_API_BASE_URL || ""
 
 function App() {
 
@@ -16,10 +16,12 @@ function App() {
   useEffect(()=>{
     const getUser = async () => {
       try {
-        const result = await axios.get(serverURL + "/api/user/current-user", {withCredentials: true});
+        const result = await axios.get(`${serverURL}/api/user/current-user`, {withCredentials: true});
         dispatch(setUserData(result.data));
       } catch (error) {
-        console.log(error);
+        if (error?.response?.status !== 401) {
+          console.error("Failed to fetch user:", error.message);
+        }
         dispatch(setUserData(null)); 
       }
     }
