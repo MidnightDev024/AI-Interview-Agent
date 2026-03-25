@@ -139,7 +139,18 @@ const Step1SetUp = ({onStart}) => {
                   />
                   <p 
                   className='text-gray-500 font-medium'>
-                  {resumeFile ? resumeFile.name : "Click to upload resume (optional)"}</p>
+                  {resumeFile ? resumeFile.name : "Click to upload resume (optional)"}
+                  </p>
+
+                  {resumeFile && (
+                    <motion.button
+                    whileHover={{ scale:1.02 }}
+                    className='mt-4 bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition'>
+                      {analysing ? "Analysing..." : "Analyse Resume"}
+
+                    </motion.button>
+                  )}
+
                 </motion.div>
               )}
           </div>
