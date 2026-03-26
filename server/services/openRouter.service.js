@@ -9,7 +9,7 @@ export const askAi = async (message) => {
         }
         const response = await axios.post("https://openrouter.ai/api/v1/chat/completions",
         {
-            model: "OpenAI: GPT-4o-mini",
+            model: "openai/gpt-4o-mini",
             messages: message
         },
         {
