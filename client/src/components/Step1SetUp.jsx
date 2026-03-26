@@ -7,7 +7,8 @@ import {
   FaMicrophoneAlt,
   FaChartLine
 } from 'react-icons/fa';
-import { useState } from 'react';
+import axios from 'axios';
+import { serverURL } from '../App';
 
 const Step1SetUp = ({onStart}) => {
 
@@ -21,6 +22,33 @@ const Step1SetUp = ({onStart}) => {
   const [resumeText, setResumeText] = React.useState("");
   const [analysisDone, setAnalysisDone] = React.useState(false);
   const [analysing, setAnalysing] = React.useState(false);
+
+  const handleUploadResume = async () =>
+  {
+    if(!resumeFile || analysing) return;
+      setAnalysing(true)
+
+      const formdata = new FormData()
+      formdata.append("resume", resumeFile);
+    try{
+      const result = await axios.post(serverURL + "/api/interview/resume", formdata , {withCredentials:true})
+
+      console.log(result.data);
+
+      setRole(result.data.role || "");
+      setExperience(result.data.experience || "" );
+      setProjects(result.data.projects || []);
+      setSkills(result.data.skills || []);
+      setResumeText(result.data.resumeText || "");
+      setAnalysisDone(true);
+      setAnalysing(false);
+
+    } catch (error) {
+      console.log(error);
+      setAnalysing(false)
+      
+    }
+  }
 
   return (
     <motion.div 
@@ -145,6 +173,7 @@ const Step1SetUp = ({onStart}) => {
                   {resumeFile && (
                     <motion.button
                     whileHover={{ scale:1.02 }}
+                    onClick={(e) => {e.stopPropagation(); handleUploadResume();}}
                     className='mt-4 bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition'>
                       {analysing ? "Analysing..." : "Analyse Resume"}
 
@@ -153,6 +182,38 @@ const Step1SetUp = ({onStart}) => {
 
                 </motion.div>
               )}
+
+              {analysisDone && (
+                <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opaciity: 1, y: 0 }}
+                className='bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4'>
+                  <h3
+                  className='text-lg font-semibold text-gray-800'>
+                    Resume Analysis result
+                  </h3>
+
+                  {projects.length >0 &&(
+                    <div>
+                    <p className='font-medium text-gray-700 mb-1'>Projects:</p>
+                    <ul className='list-disc list-inside text-gray-600 space-y-1'>
+                      {projects.map((project,index) => (
+                        <li key={index}>{project}</li>
+                      ))}
+                    </ul>
+                    </div>
+                  )}
+
+                </motion.div>
+              )}
+
+              <motion.button 
+              disabled={!role || !experience}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              className='w-full disable:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md'>
+                Start Interview
+              </motion.button>
           </div>
         </motion.div>
       </div>
