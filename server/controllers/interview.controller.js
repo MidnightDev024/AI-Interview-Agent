@@ -56,7 +56,7 @@ export const analyzeResume = async (req, res) => {
         res.json({
             role: parsed.role,
             experience: parsed.experience,
-            project: parsed.projects,
+            projects: parsed.projects,
             skills: parsed.skills,
             resumeText
         })
