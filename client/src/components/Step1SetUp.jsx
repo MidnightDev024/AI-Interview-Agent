@@ -204,6 +204,17 @@ const Step1SetUp = ({onStart}) => {
                     </div>
                   )}
 
+                  {skills.length >0 &&(
+                    <div>
+                    <p className='font-medium text-gray-700 mb-1'>Skills:</p>
+                    <ul className='list-disc list-inside text-gray-600 space-y-1'>
+                      {skills.map((skill,index) => (
+                        <li key={index}>{skill}</li>
+                      ))}
+                    </ul>
+                    </div>
+                  )}
+
                 </motion.div>
               )}
 
