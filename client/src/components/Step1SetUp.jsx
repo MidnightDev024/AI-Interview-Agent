@@ -62,7 +62,7 @@ const Step1SetUp = ({onStart}) => {
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className='realtive bg-gradient-to-br from-grrn-50 to-green-100 p-12 flex flex-col justify-center'>
+        className='relative bg-gradient-to-br from-green-50 to-green-100 p-12 flex flex-col justify-center'>
 
           <h2 className='text-4xl font-bold text-gray-800 mb-6'>
             Start Your AI Interview
@@ -114,7 +114,7 @@ const Step1SetUp = ({onStart}) => {
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
         className='p-12 bg-white'>
-          <h2 className='text-3xl font-boold text-gray-800 mb-8'>
+          <h2 className='text-3xl font-bold text-gray-800 mb-8'>
             Interview SetUp
           </h2>
 
@@ -186,7 +186,7 @@ const Step1SetUp = ({onStart}) => {
               {analysisDone && (
                 <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opaciity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 className='bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4'>
                   <h3
                   className='text-lg font-semibold text-gray-800'>
@@ -207,11 +207,11 @@ const Step1SetUp = ({onStart}) => {
                   {skills.length >0 &&(
                     <div>
                     <p className='font-medium text-gray-700 mb-1'>Skills:</p>
-                    <ul className='list-disc list-inside text-gray-600 space-y-1'>
+                    <div className='flex flex-wrap gap-2'>
                       {skills.map((skill,index) => (
-                        <li key={index}>{skill}</li>
+                        <span key={index} className='bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm'>{skill}</span>
                       ))}
-                    </ul>
+                    </div>
                     </div>
                   )}
 
@@ -222,7 +222,7 @@ const Step1SetUp = ({onStart}) => {
               disabled={!role || !experience}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
-              className='w-full disable:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md'>
+              className='w-full disabled:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md'>
                 Start Interview
               </motion.button>
           </div>
