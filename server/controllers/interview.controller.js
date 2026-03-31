@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { askAi } from "../services/openRouter.service.js";
 import { use } from "react";
 import Interview from "../models/interview.model.js";
+import User from "../models/user.model.js";
 
 export const analyzeResume = async (req, res) => {
     try {
@@ -77,7 +78,7 @@ export const analyzeResume = async (req, res) => {
 
 export const genrateQuestions = async (req, res) => {
     try {
-        const {role, experience, mode, resumeText, projects, skills} = req.body;
+        let {role, experience, mode, resumeText, projects, skills} = req.body;
 
         role = role?.trim()
         experience = experience?.trim()
@@ -87,14 +88,10 @@ export const genrateQuestions = async (req, res) => {
             return res.status(400).json({message: "Role, experience and mode are required"})
         }
 
-        const user = await User.findById(req.user._id); 
+        const user = await User.findById(req.userId); 
 
         if(!user) {
             return res.status(404).json({message: "User not found"});
-        }
-
-        if (user.credits < 50) {
-            return res.status(403).json({message: "Not enough credits. Minimum 50 credits required to generate questions."});
         }
 
         const projectText = Array.isArray(projects) && projects.length ? projects.join(", ") : "None";
@@ -167,21 +164,23 @@ export const genrateQuestions = async (req, res) => {
             return res.status(500).json({message: "Failed to generate questions. Please try again."});
         }
 
-        user.credits -= 50;
-        await user.save();
-
-        const interview = await interview.create({
+        const interview = await Interview.create({
             userId: user._id,
             role,
             experience,
             mode,
             resumeText: safeResume,
             questions: questionsArray.map((q, index) => ({
-                questions: q,
+                questionText: q,
                 difficulty: ["easy", "easy", "medium", "medium", "hard"][index],
                 timeLimit: [60, 60, 90, 90, 120][index],
             }))
         })
+
+        if (user.credits >= 50) {
+            user.credits -= 50;
+            await user.save();
+        }
 
         res.json({
             interviewId: interview._id,
@@ -191,7 +190,6 @@ export const genrateQuestions = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error);
         return res.status(500).json({message: "An error occurred while generating questions.", error});
     }
 }
