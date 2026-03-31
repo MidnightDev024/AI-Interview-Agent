@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 import Step1SetUp from '../components/Step1SetUp';
-import Step2SetUp from '../components/Step2Interview';
-import Step3SetUp from '../components/Step3Report';
+import Step2Interview from '../components/Step2Interview';
+import Step3Report from '../components/Step3Report';
 
 const InterviewPage = () => {
     const [step, setStep] = React.useState(1);
@@ -13,7 +13,7 @@ const InterviewPage = () => {
             <Step1SetUp 
             onStart={(Data) => { 
                 setInterviewData(Data);
-                setStep(2);
+                setStep(2) ;
             }} />
         )}
         {step===2 && (
@@ -28,9 +28,9 @@ const InterviewPage = () => {
             <Step3Report report={interviewData} 
             />
         )}
-      
+    
     </div>
-  )
+    )
 }
 
 export default InterviewPage
