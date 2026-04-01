@@ -20,6 +20,7 @@ const Step1SetUp = ({onStart}) => {
   const [role, setRole] = React.useState("");
   const [experience, setExperience] = React.useState("");
   const [mode, setMode] = React.useState("Technical");
+  const [gender, setGender] = React.useState("male");
   const [resumeFile, setResumeFile] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [projects, setProjects] = React.useState([]);
@@ -68,7 +69,7 @@ const Step1SetUp = ({onStart}) => {
       }
       setLoading(false);
 
-      onStart(result.data)
+      onStart({...result.data, username: userData?.username || userData?.name || "", gender})
 
     } catch (error) {
       console.log(error);

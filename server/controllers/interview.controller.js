@@ -134,10 +134,10 @@ export const genrateQuestions = async (req, res) => {
 
                 Difficulty progression: 
                 Question 1 -> easy
-                Question 2 -> easy
+                Question 2 -> medium
                 Question 3 -> medium
-                Question 4 -> medium
-                Question 5 -> Hard
+                Question 4 -> hard
+                Question 5 -> very hard
 
                 Make queestions based on the candidate's Role, Experience, InterviewMode, Projects, Skills and Resume Details.
                 `
@@ -172,8 +172,8 @@ export const genrateQuestions = async (req, res) => {
             resumeText: safeResume,
             questions: questionsArray.map((q, index) => ({
                 questionText: q,
-                difficulty: ["easy", "easy", "medium", "medium", "hard"][index],
-                timeLimit: [60, 60, 90, 90, 120][index],
+                difficulty: ["easy", "medium", "medium", "hard", "very hard"][index],
+                timeLimit: [60, 90, 90, 120, 120][index],
             }))
         })
 
