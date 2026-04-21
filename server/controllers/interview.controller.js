@@ -185,7 +185,7 @@ export const genrateQuestions = async (req, res) => {
         res.json({
             interviewId: interview._id,
             creditsLeft: user.credits,
-            username: user.username,
+            userName: user.name,
             questions: interview.questions
         })
 
@@ -196,10 +196,18 @@ export const genrateQuestions = async (req, res) => {
 
 export const submitAnswer = async (req, res) => {
     try {
-        const { interviewId, questionIndex, answer, timeTaken } = req.body
+        const { interviewId, questionIndex, questionId, answer, timeTaken } = req.body
 
         const interview = await Interview.findById(interviewId)
-        const question = interview.questions[questionIndex]
+        if (!interview) {
+            return res.status(404).json({ message: 'Interview not found' });
+        }
+
+        const resolvedIndex = typeof questionIndex === 'number' ? questionIndex : interview.questions.findIndex((question) => String(question._id) === String(questionId));
+        const question = interview.questions[resolvedIndex]
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
 
         // If no Answer
         if (!answer) {
@@ -288,7 +296,7 @@ export const submitAnswer = async (req, res) => {
         question.confidence = parsed.confidence;
         question.communication = parsed.communication
         question.correctness = parsed.correctness;
-        question.score = parsed.score;
+        question.score = parsed.finalScore;
         question.feedback = parsed.feedback;
 
         await interview.save();
@@ -360,5 +368,62 @@ export const finishInterview = async (req, res) => {
         })
     } catch (error) {
         return res.status(500).json({message: "Failed to finish interview"})
+    }
+}
+
+export const getMyInterviews = async (req, res) => {
+    try {
+        const interviews = await Interview.find({ userId: req.userId })
+            .sort({ createdAt: -1 })
+            .select("role experience mode finalScore status createdAt")
+
+        return res.status(200).json(interviews)
+    } catch (error) {
+        return res.status(500).json({message: "failed to get interviews"})
+    }
+}
+
+export const getInterviewReport = async (req, res) => {
+    try {
+        const interview = await Interview.findById(req.params.interviewId)
+
+        if(!interview) {
+            return res.status(404).json({ message : "Interview not found" });
+        }
+
+        const totalQuestions = interview.questions.length;
+
+        let totalConfidence = 0;
+        let totalCommunication = 0;
+        let totalCorrectness = 0;
+
+        interview.questions.forEach((q) => {
+            totalConfidence += q.confidence || 0;
+            totalCommunication += q.communication || 0;
+            totalCorrectness += q.correctness || 0; 
+        })
+
+        const avgConfidence = totalQuestions
+        ? totalConfidence / totalQuestions
+        : 0;
+
+        const avgCommunication = totalQuestions
+        ? totalCommunication / totalQuestions
+        : 0;
+
+        const avgCorrectness = totalQuestions
+        ? totalCorrectness / totalQuestions
+        : 0;
+
+        return res.json({
+            finalScore: interview.finalScore,
+            confidence: Number(avgConfidence.toFixed(1)),
+            communication: Number(avgCommunication.toFixed(1)),
+            correctness: Number(avgCorrectness.toFixed(1)),
+            questionWiseScore: interview.questions
+        })
+
+    } catch (error) {
+        return res.status(500).json({message: `Failed to get interview report ${error}`})
     }
 }
