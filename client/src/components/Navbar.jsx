@@ -75,7 +75,7 @@ function Navbar() {
                             <div className='absolute right-[-50px] mt-3 w-64 bg-white shadow-xl border border-gray-200 rounded p-5 z-50'>
                                 <p className='text-sm text-gray-600 mb-4'>Need more credits? <br /> Upgrade your plan at any time.</p>
                                 <button
-                                onClick={() => navigate("/upgrade")}
+                                onClick={() => navigate("/pricing")}
                                 className='w-full bg-black text-white py-2 rounded-lg text-sm cursor-pointer hover:bg-gray-800 transition'>
                                     Upgrade Now
                                 </button>
