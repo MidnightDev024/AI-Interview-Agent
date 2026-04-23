@@ -178,7 +178,7 @@ const Step3Report = ({report}) => {
       <div className='mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div className='mb-10 w-full flex items-center gap-4 flex-wrap'>
           <button 
-          onClick={() => navigate("/history")}
+          onClick={() => navigate(-1)}
           className='mt-1 p-3 rounded-full bg-white shadow hover:shadow-md transition'>
             <FaArrowLeft className='text-gray-600' />
           </button>
