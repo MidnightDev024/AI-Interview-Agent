@@ -27,7 +27,7 @@ function InterviewHistory() {
       <div className='w-[90vw] lg:w-[70vw] max-w-[90%] mx-auto'>
         <div className='mb-10 w-full flex items-center gap-4 flex-wrap'>
           <button 
-          onClick={() => Navigate("/")}
+          onClick={() => Navigate(-1)}
           className='mt-1 p-3 rounded-full bg-white shadow hover:shadow-md transition'>
             <FaArrowLeft className='text-gray-600' />
           </button>
