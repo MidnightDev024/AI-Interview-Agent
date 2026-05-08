@@ -11,7 +11,6 @@ import axios from 'axios';
 import { serverURL } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
-import { set } from 'mongoose';
 
 const Step1SetUp = ({onStart}) => {
 
