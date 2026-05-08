@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { color, motion } from 'motion/react';
-import { set } from 'mongoose';
 import axios from 'axios';
 import { serverURL } from '../App.jsx';
 import { setUserData } from '../redux/userSlice.js';
