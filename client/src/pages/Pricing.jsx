@@ -5,11 +5,14 @@ import { color, motion } from 'motion/react';
 import { set } from 'mongoose';
 import axios from 'axios';
 import { serverURL } from '../App.jsx';
+import { setUserData } from '../redux/userSlice.js';
+import { useDispatch } from 'react-redux';
 
 function Pricing() {
   const navigate = useNavigate();
   const [selectPlan, setSelectPlan] = useState("free");
   const [loadingPlan, setLoadingPlan] = useState(null);
+  const dispatch = useDispatch();
 
   const plans = [
     {
@@ -69,7 +72,7 @@ function Pricing() {
         amount: amount,
         credits: plan.credits,
       },{withCredentials: true} )
-      console.log(result.data)
+      
 
       const option = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -80,7 +83,18 @@ function Pricing() {
         order_id: result.data.id,
 
         handler: async function (response) {
-          console.log(response)
+          const verifyPayment = await axios.post(serverURL + "/api/payment/verify", 
+            {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            }, 
+            {withCredentials: true} );
+
+          dispatch(setUserData(verifyPayment.data.user));
+
+          alert("Payment Successful! 🎊 Credits Added");
+          navigate("/");
         },
 
         theme:{
