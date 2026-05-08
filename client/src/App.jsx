@@ -11,7 +11,7 @@ import InterviewHistory from './pages/InterviewHistory.jsx'
 import Pricing from './pages/Pricing.jsx'
 import InterviewReport from './pages/InterviewReport.jsx'
 
-export const serverURL = import.meta.env.VITE_API_BASE_URL || ""
+export const serverURL = "https://ai-interview-agent-1-0h0w.onrender.com"
 
 function App() {
 
