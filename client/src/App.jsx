@@ -20,7 +20,10 @@ function App() {
     const getUser = async () => {
       try {
         const result = await axios.get(`${serverURL}/api/user/current-user`, {withCredentials: true});
-        dispatch(setUserData(result.data));
+        // normalize payload: some endpoints return { user: {...} } while others return the user object directly
+        const payloadUser = result.data?.user ?? result.data;
+        console.log("fetched current user:", payloadUser);
+        dispatch(setUserData(payloadUser));
       } catch (error) {
         if (error?.response?.status !== 401) {
           console.error("Failed to fetch user:", error.message);
