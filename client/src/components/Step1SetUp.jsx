@@ -50,6 +50,10 @@ const Step1SetUp = ({onStart}) => {
 
     } catch (error) {
       console.log(error);
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message;
+      const message = serverMessage || error?.message || "Resume upload failed";
+      alert(status ? `Upload failed (${status}): ${message}` : message);
       setAnalysing(false)
       
     }
