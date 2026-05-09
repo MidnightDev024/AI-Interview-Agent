@@ -36,7 +36,7 @@ const Step1SetUp = ({onStart}) => {
       const formdata = new FormData()
       formdata.append("resume", resumeFile);
     try{
-      const result = await axios.post(serverURL + "/api/interview/resume", formdata , {withCredentials:true})
+      const result = await axios.post(serverURL + "/api/interview/resume", formdata , {withCredentials:true, timeout: 30000})
 
       console.log(result.data);
 
