@@ -13,8 +13,21 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const allowedOrigins = [
+    'https://ai-interview-agent-client-bgax.onrender.com',
+    'https://ai-interview-agent-1-0h0w.onrender.com'
+];
+
 app.use(cors({
-    origin: 'https://ai-interview-agent-client-bgax.onrender.com',
+    origin: function(origin, callback) {
+        // allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
+        } else {
+            return callback(new Error('CORS policy: This origin is not allowed'));
+        }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
