@@ -18,11 +18,19 @@ const allowedOrigins = [
     'https://ai-interview-agent-1-0h0w.onrender.com'
 ];
 
+const isAllowedOrigin = (origin) => {
+    if (allowedOrigins.includes(origin)) return true;
+    if (/^https:\/\/ai-interview-agent(?:-client)?-[a-z0-9-]+\.onrender\.com$/i.test(origin)) return true;
+    if (/^https?:\/\/localhost(?::\d+)?$/i.test(origin)) return true;
+    if (/^https?:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin)) return true;
+    return false;
+};
+
 app.use(cors({
     origin: function(origin, callback) {
         // allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        if (isAllowedOrigin(origin)) {
             return callback(null, true);
         } else {
             return callback(new Error('CORS policy: This origin is not allowed'));
