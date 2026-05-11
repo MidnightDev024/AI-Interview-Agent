@@ -13,16 +13,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [
+const defaultAllowedOrigins = [
     'https://ai-interview-agent-client-bgax.onrender.com',
     'https://ai-interview-agent-1-0h0w.onrender.com'
 ];
 
+const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+const isProduction = process.env.NODE_ENV === 'production';
+
 const isAllowedOrigin = (origin) => {
-    if (allowedOrigins.includes(origin)) return true;
-    if (/^https:\/\/ai-interview-agent(?:-client)?-[a-z0-9-]+\.onrender\.com$/i.test(origin)) return true;
-    if (/^https?:\/\/localhost(?::\d+)?$/i.test(origin)) return true;
-    if (/^https?:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin)) return true;
+    if (allowedOrigins.has(origin)) return true;
+    if (!isProduction && /^https?:\/\/localhost(?::\d+)?$/i.test(origin)) return true;
+    if (!isProduction && /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin)) return true;
     return false;
 };
 
