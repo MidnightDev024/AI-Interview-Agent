@@ -23,13 +23,12 @@ const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+const allowedOriginsSet = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
 const isProduction = process.env.NODE_ENV === 'production';
 
 const isAllowedOrigin = (origin) => {
-    if (allowedOrigins.has(origin)) return true;
-    if (!isProduction && /^https?:\/\/localhost(?::\d+)?$/i.test(origin)) return true;
-    if (!isProduction && /^https?:\/\/127\.0\.0\.1(?::\d+)?$/i.test(origin)) return true;
+    if (allowedOriginsSet.has(origin)) return true;
+    if (!isProduction && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin)) return true;
     return false;
 };
 
