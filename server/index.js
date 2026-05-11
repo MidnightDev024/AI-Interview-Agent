@@ -13,44 +13,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const defaultAllowedOrigins = [
+const allowedOrigins = [
     'https://ai-interview-agent-client-bgax.onrender.com',
     'https://ai-interview-agent-1-0h0w.onrender.com'
 ];
-
-const isValidOrigin = (origin) => {
-    try {
-        const parsed = new URL(origin);
-        if (!['http:', 'https:'].includes(parsed.protocol)) return false;
-        return parsed.origin === origin;
-    } catch {
-        return false;
-    }
-};
-
-const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-    .filter(isValidOrigin);
-
-const allowedOriginsSet = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
-const isProduction = process.env.NODE_ENV === 'production';
-
-const isAllowedOrigin = (origin) => {
-    if (allowedOriginsSet.has(origin)) return true;
-    if (!isProduction && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(origin)) return true;
-    return false;
-};
 
 app.use(cors({
     origin: function(origin, callback) {
         // allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        if (isAllowedOrigin(origin)) {
+        if (allowedOrigins.indexOf(origin) !== -1) {
             return callback(null, true);
         } else {
-            return callback(new Error(`CORS policy: Origin ${origin} is not allowed`));
+            return callback(new Error('CORS policy: This origin is not allowed'));
         }
     },
     credentials: true,
