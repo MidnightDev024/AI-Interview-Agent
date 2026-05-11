@@ -18,10 +18,21 @@ const defaultAllowedOrigins = [
     'https://ai-interview-agent-1-0h0w.onrender.com'
 ];
 
+const isValidOrigin = (origin) => {
+    try {
+        const parsed = new URL(origin);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+        return parsed.origin === origin;
+    } catch {
+        return false;
+    }
+};
+
 const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
     .split(',')
     .map((origin) => origin.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter(isValidOrigin);
 
 const allowedOriginsSet = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
 const isProduction = process.env.NODE_ENV === 'production';
