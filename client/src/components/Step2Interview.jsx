@@ -43,9 +43,13 @@ function Step2Interview({interviewData, onFinish}) {
       const voices = window.speechSynthesis.getVoices();
       if (!voices.length) return;
 
-      const adultVoice = voices.find((v) => {
+      const isChildLikeVoice = (name = "") => /\b(child|junior|kid)\b/.test(name);
+
+      const englishVoices = voices.filter((v) => v.lang?.toLowerCase().startsWith("en"));
+      const adultEnglishVoices = englishVoices.filter((v) => !isChildLikeVoice(v.name.toLowerCase()));
+
+      const preferredAdultVoice = adultEnglishVoices.find((v) => {
         const voiceName = v.name.toLowerCase();
-        const isEnglish = v.lang?.toLowerCase().startsWith("en");
         const preferredVoice = [
           "google us english",
           "microsoft david",
@@ -56,9 +60,14 @@ function Step2Interview({interviewData, onFinish}) {
           "zira",
           "serena"
         ].some((name) => voiceName.includes(name));
-        const childLike = ["child", "junior", "kid", "boy", "girl"].some((name) => voiceName.includes(name));
-        return isEnglish && preferredVoice && !childLike;
-      }) || voices.find((v) => v.lang?.toLowerCase() === "en-us") || voices[0];
+        return preferredVoice;
+      });
+
+      const adultVoice = preferredAdultVoice
+        || adultEnglishVoices.find((v) => v.lang?.toLowerCase() === "en-us")
+        || adultEnglishVoices[0]
+        || englishVoices[0]
+        || voices[0];
 
       setSelectedVoice(adultVoice);
       const selectedVoiceName = adultVoice.name.toLowerCase();
@@ -94,7 +103,7 @@ function Step2Interview({interviewData, onFinish}) {
 
         utterance.voice = selectedVoice;
 
-        // Human Like Pase
+        // Human Like Pace
         utterance.rate = isMobileDevice ? 0.9 : 0.92; // Slightly slower than normal
         utterance.pitch = isMobileDevice ? 1.1 : 1.05; // Mobile tuned mature voice
         utterance.volume = 1; // Full volume
