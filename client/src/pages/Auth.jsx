@@ -38,7 +38,7 @@ function Auth({isModel = false}) {
   return (
     <div className={`
       w-full 
-      ${isModel ? "py-4" : "min-h-screen bg-[#f3f3f3] flex items-center justify-center px-6 py-20"}
+      ${isModel ? "px-3 py-4" : "min-h-screen bg-[#f3f3f3] flex items-center justify-center px-4 sm:px-6 py-20"}
     `}>
       <motion.div
       initial={{ opacity: 0, y: -80 }}
@@ -46,7 +46,7 @@ function Auth({isModel = false}) {
       transition={{duration: 0.6}}
       className={`
         w-full 
-        ${isModel ? "min-w-lg p-12 rounded-[32px]" : "max-w-md p-8 rounded-3xl"}
+        ${isModel ? "max-w-[95vw] sm:max-w-lg p-5 sm:p-12 rounded-2xl sm:rounded-[32px]" : "max-w-md p-6 sm:p-8 rounded-3xl"}
         bg-white shadow-2xl border border-gray-200
       `}>
         <div className='flex items-center justify-center gap-3 mb-6'>
