@@ -27,6 +27,7 @@ function Step2Interview({interviewData, onFinish}) {
   const micEnabledRef = useRef(isMicOn);
   const aiPlayingRef = useRef(isAIPlaying);
   const videoRef = useRef(null);
+  const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
   const currentQuestion = questions[currentIndex];
 
   useEffect(() => {
@@ -42,45 +43,34 @@ function Step2Interview({interviewData, onFinish}) {
       const voices = window.speechSynthesis.getVoices();
       if (!voices.length) return;
 
-      // try known for Female voices
-      const femaleVoices = 
-      voices.find(v => 
-        v.name.toLowerCase().includes("zira") ||
-        v.name.toLowerCase().includes("susan") ||
-        v.name.toLowerCase().includes("female") ||
-        v.name.toLowerCase().includes("samantha") 
-      )
-      if (femaleVoices) {
-        setSelectedVoice(femaleVoices);
-        setVoiceGender("female")
-        return;
-      }
+      const adultVoice = voices.find((v) => {
+        const voiceName = v.name.toLowerCase();
+        const isEnglish = v.lang?.toLowerCase().startsWith("en");
+        const preferredVoice = [
+          "google us english",
+          "microsoft david",
+          "microsoft mark",
+          "alex",
+          "daniel",
+          "samantha",
+          "zira",
+          "serena"
+        ].some((name) => voiceName.includes(name));
+        const childLike = ["child", "junior", "kid", "boy", "girl"].some((name) => voiceName.includes(name));
+        return isEnglish && preferredVoice && !childLike;
+      }) || voices.find((v) => v.lang?.toLowerCase() === "en-us") || voices[0];
 
-      // try known for male voices
-      const maleVoices =
-      voices.find(v =>
-        v.name.toLowerCase().includes("david") ||
-        v.name.toLowerCase().includes("john") ||
-        v.name.toLowerCase().includes("male") ||
-        v.name.toLowerCase().includes("mark") 
-      )
-      if (maleVoices) {
-        setSelectedVoice(maleVoices);
-        setVoiceGender("male");
-        return;
-      }
-
-      // fallback to first voice
-      setSelectedVoice(voices[0]);
-      setVoiceGender("male");
+      setSelectedVoice(adultVoice);
+      const selectedVoiceName = adultVoice.name.toLowerCase();
+      setVoiceGender(selectedVoiceName.includes("zira") || selectedVoiceName.includes("samantha") ? "female" : "male");
 
     };
 
     loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
 
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
+      window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
     };
   }, [])
 
@@ -105,8 +95,8 @@ function Step2Interview({interviewData, onFinish}) {
         utterance.voice = selectedVoice;
 
         // Human Like Pase
-        utterance.rate = 0.92; // Slightly slower than normal
-        utterance.pitch = 1.05; // Small warmth increase
+        utterance.rate = isMobileDevice ? 0.9 : 0.92; // Slightly slower than normal
+        utterance.pitch = isMobileDevice ? 1.1 : 1.05; // Mobile tuned mature voice
         utterance.volume = 1; // Full volume
 
         utterance.onstart = () => {
