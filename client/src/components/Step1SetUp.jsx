@@ -36,7 +36,10 @@ const Step1SetUp = ({onStart}) => {
       const formdata = new FormData()
       formdata.append("resume", resumeFile);
     try{
-      const result = await axios.post(serverURL + "/api/interview/resume", formdata , {withCredentials:true, timeout: 30000})
+      const result = await axios.post(serverURL + "/api/interview/resume", formdata , {
+        withCredentials:true,
+        timeout: 45000,
+      })
 
       console.log(result.data);
 
@@ -46,16 +49,19 @@ const Step1SetUp = ({onStart}) => {
       setSkills(result.data.skills || []);
       setResumeText(result.data.resumeText || "");
       setAnalysisDone(true);
-      setAnalysing(false);
 
     } catch (error) {
       console.log(error);
       const status = error?.response?.status;
       const serverMessage = error?.response?.data?.message;
-      const message = serverMessage || error?.message || "Resume upload failed";
+      const message = error?.code === "ECONNABORTED"
+        ? "Request timed out. Please try again."
+        : error?.message === "Network Error"
+          ? "Network error while uploading resume. Please check your internet connection and try again."
+          : (serverMessage || error?.message || "Resume upload failed");
       alert(status ? `Upload failed (${status}): ${message}` : message);
+      } finally {
       setAnalysing(false)
-      
     }
   }
 
