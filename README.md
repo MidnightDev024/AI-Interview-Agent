@@ -51,7 +51,7 @@ AI-Interview-Agent, also shown in the UI as **EvalAI**, is a full-stack web appl
 
 ### AI
 - OpenRouter API
-- Model used: `openai/gpt-4o-mini`
+- Default model: `deepseek/deepseek-chat-v3-0324:free` (free tier)
 
 ---
 
@@ -180,10 +180,11 @@ AI-Interview-Agent, also shown in the UI as **EvalAI**, is a full-stack web appl
 - MONGO_URI=your_mongodb_uri
 - JWT_SECRET_KEY=your_secret_key
 - OPENROUTER_API_KEY=your_api_key
+- OPENROUTER_MODEL=deepseek/deepseek-chat-v3-0324:free (optional)
 
 ### Client (.env)
 - VITE_FIREBASE_APIKEY=your_firebase_key
-- VITE_API_BASE_URL=http://localhost:5000
+- VITE_API_BASE_URL=http://localhost:5000 (or your deployed backend URL)
 
 
 ⚠️ Don’t push real keys to GitHub. Always use placeholders.
