@@ -180,7 +180,7 @@ AI-Interview-Agent, also shown in the UI as **EvalAI**, is a full-stack web appl
 - MONGO_URI=your_mongodb_uri
 - JWT_SECRET_KEY=your_secret_key
 - OPENROUTER_API_KEY=your_api_key
-- OPENROUTER_MODEL=deepseek/deepseek-chat-v3-0324:free (optional)
+- OPENROUTER_MODEL=deepseek/deepseek-chat-v3-0324:free (optional, overrides default model)
 
 ### Client (.env)
 - VITE_FIREBASE_APIKEY=your_firebase_key
