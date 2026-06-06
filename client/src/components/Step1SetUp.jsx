@@ -52,20 +52,15 @@ const Step1SetUp = ({onStart}) => {
 
     } catch (error) {
       console.log(error);
-      if (
-        error.message?.includes("ERR_UPLOAD_FILE_CHANGED") ||
-        error.code === "ECONNABORTED"
-      ) {
-        alert("The file has changed since you selected it. Please re-select the file and try again.");
-      } else {
-        const status = error?.response?.status;
-        const serverMessage = error?.response?.data?.message;
-        const message = error?.message === "Network Error"
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message;
+      const message = error?.code === "ECONNABORTED"
+        ? "Request timed out. Please try again."
+        : error?.message === "Network Error"
           ? "Network error while uploading resume. Please check your internet connection and try again."
           : (serverMessage || error?.message || "Resume upload failed");
-        alert(status ? `Upload failed (${status}): ${message}` : message);
-      }
-    } finally {
+      alert(status ? `Upload failed (${status}): ${message}` : message);
+      } finally {
       setAnalysing(false)
     }
   }
@@ -206,12 +201,7 @@ const Step1SetUp = ({onStart}) => {
                   type="file" 
                   id="resume-upload" 
                   className='hidden'
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      setResumeFile(new File([file], file.name, { type: file.type }));
-                    }
-                  }}
+                  onChange={(e) => setResumeFile(e.target.files[0])}
                   />
                   <p 
                   className='text-gray-500 font-medium'>
