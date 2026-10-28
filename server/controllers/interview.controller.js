@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import { askAi, OpenRouterError } from "../services/openRouter.service.js";
 import Interview from "../models/interview.model.js";
@@ -45,13 +46,30 @@ const extractJsonObject = (text = "") => {
   return null;
 };
 
+const UPLOAD_DIR = path.resolve(process.cwd(), "public");
+
+const resolveSafeUploadPath = (filePath) => {
+  const resolvedPath = path.resolve(filePath);
+  const safePrefix = `${UPLOAD_DIR}${path.sep}`;
+
+  if (resolvedPath !== UPLOAD_DIR && !resolvedPath.startsWith(safePrefix)) {
+    throw new Error("Invalid uploaded file path.");
+  }
+
+  return resolvedPath;
+};
+
 export const analyzeResume = async (req, res) => {
   let filepath = null;
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Resume required" });
     }
-    filepath = req.file.path;
+    const fileName = path.basename(req.file.filename || "");
+    if (!fileName) {
+      return res.status(400).json({ message: "Invalid uploaded file." });
+    }
+    filepath = resolveSafeUploadPath(path.join(UPLOAD_DIR, fileName));
 
     const filebuffer = await fs.promises.readFile(filepath);
     const uint8Array = new Uint8Array(filebuffer);
