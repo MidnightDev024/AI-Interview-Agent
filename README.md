@@ -180,6 +180,9 @@ AI-Interview-Agent, also shown in the UI as **EvalAI**, is a full-stack web appl
 - MONGO_URI=your_mongodb_uri
 - JWT_SECRET_KEY=your_secret_key
 - OPENROUTER_API_KEY=your_api_key
+- OPENROUTER_MODEL=google/gemma-4-31b-it:free (optional)
+- OPENROUTER_SITE_URL=http://localhost:5173 (optional)
+- OPENROUTER_SITE_NAME=EvalAI (optional)
 
 ### Client (.env)
 - VITE_FIREBASE_APIKEY=your_firebase_key
@@ -299,6 +302,8 @@ http://localhost:5173
 
 - Resume parsing not working?
   - Use `pdfjs-dist` legacy build
+  - Ensure `OPENROUTER_API_KEY` is set on the server
+  - If OpenRouter is unavailable, setup continues with extracted resume text and manual role/experience input
 
 ---
 
