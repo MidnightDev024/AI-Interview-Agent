@@ -1,20 +1,75 @@
 import fs from "fs";
+import path from "path";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import { askAi } from "../services/openRouter.service.js";
-import { use } from "react";
+import { askAi, OpenRouterError } from "../services/openRouter.service.js";
 import Interview from "../models/interview.model.js";
 import User from "../models/user.model.js";
 import Payment from "../models/payment.model.js";
 import razorpay from "../services/razorpay.service.js";
 import crypto from "crypto";
-import React from "react";
+
+const cleanString = (value, fallback) =>
+  typeof value === "string" && value.trim() ? value.trim() : fallback;
+
+const normalizeList = (value) => {
+  if (!Array.isArray(value)) return [];
+  const unique = new Set();
+  value.forEach((item) => {
+    if (typeof item !== "string") return;
+    const trimmed = item.trim();
+    if (trimmed) unique.add(trimmed);
+  });
+  return Array.from(unique);
+};
+
+const extractJsonObject = (text = "") => {
+  if (typeof text !== "string") return null;
+
+  const trimmed = text.trim();
+  const directCandidate = trimmed.replace(/^```json/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+
+  const candidates = [directCandidate];
+  const firstBrace = directCandidate.indexOf("{");
+  const lastBrace = directCandidate.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    candidates.push(directCandidate.slice(firstBrace, lastBrace + 1));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+};
+
+const UPLOAD_DIR = path.resolve(process.cwd(), "public");
+
+const resolveSafeUploadPath = (filePath) => {
+  const resolvedPath = path.resolve(filePath);
+  const safePrefix = `${UPLOAD_DIR}${path.sep}`;
+
+  if (resolvedPath !== UPLOAD_DIR && !resolvedPath.startsWith(safePrefix)) {
+    throw new Error("Invalid uploaded file path.");
+  }
+
+  return resolvedPath;
+};
 
 export const analyzeResume = async (req, res) => {
+  let filepath = null;
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Resume required" });
     }
-    const filepath = req.file.path;
+    const fileName = path.basename(req.file.filename || "");
+    if (!fileName) {
+      return res.status(400).json({ message: "Invalid uploaded file." });
+    }
+    filepath = resolveSafeUploadPath(path.join(UPLOAD_DIR, fileName));
 
     const filebuffer = await fs.promises.readFile(filepath);
     const uint8Array = new Uint8Array(filebuffer);
@@ -27,11 +82,18 @@ export const analyzeResume = async (req, res) => {
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
       const page = await pdf.getPage(pageNum);
       const Content = await page.getTextContent();
-      const pageText = Content.items.map((item) => item.str).join(" ");
+      const pageText = Content.items
+        .map((item) => (typeof item?.str === "string" ? item.str : ""))
+        .join(" ");
       resumeText += pageText + "\n";
     }
 
     resumeText = resumeText.replace(/\s+/g, " ").trim();
+    if (!resumeText) {
+      return res
+        .status(400)
+        .json({ message: "Could not extract readable text from the uploaded PDF." });
+    }
 
     const messages = [
       {
@@ -69,27 +131,39 @@ export const analyzeResume = async (req, res) => {
       },
     ];
 
-    const aiResponse = await askAi(messages);
-
-    const parsed = JSON.parse(aiResponse);
-
-    fs.unlinkSync(filepath);
+    let parsed = null;
+    let analysisWarning = null;
+    try {
+      const aiResponse = await askAi(messages);
+      parsed = extractJsonObject(aiResponse);
+      if (!parsed) {
+        analysisWarning = "Resume text extracted, but AI response was invalid. Please review details manually.";
+      }
+    } catch (error) {
+      if (error instanceof OpenRouterError) {
+        analysisWarning = error.message;
+      } else {
+        throw error;
+      }
+    }
 
     res.json({
-      role: parsed.role,
-      experience: parsed.experience,
-      projects: parsed.projects,
-      skills: parsed.skills,
+      role: cleanString(parsed?.role, "Not specified"),
+      experience: cleanString(parsed?.experience, "Fresher"),
+      projects: normalizeList(parsed?.projects),
+      skills: normalizeList(parsed?.skills),
       resumeText,
+      ...(analysisWarning ? { analysisWarning } : {}),
     });
   } catch (error) {
     console.error("Error analyzing resume:", error);
-
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    return res
+      .status(error?.status || 500)
+      .json({ message: error?.message || "Failed to analyze resume." });
+  } finally {
+    if (filepath && fs.existsSync(filepath)) {
+      fs.unlinkSync(filepath);
     }
-
-    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -100,6 +174,9 @@ export const genrateQuestions = async (req, res) => {
     role = role?.trim();
     experience = experience?.trim();
     mode = mode?.trim();
+    if (mode?.toUpperCase() === "HR") {
+      mode = "Hr";
+    }
 
     if (!role || !experience || !mode) {
       return res
@@ -237,11 +314,11 @@ export const genrateQuestions = async (req, res) => {
       questions: interview.questions,
     });
   } catch (error) {
+    console.error("Error generating interview questions:", error);
     return res
-      .status(500)
+      .status(error?.status || 500)
       .json({
-        message: "An error occurred while generating questions.",
-        error,
+        message: error?.message || "An error occurred while generating questions.",
       });
   }
 };

@@ -11,6 +11,7 @@ import axios from 'axios';
 import { serverURL } from '../App';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
+import AuthModel from './AuthModel';
 
 const Step1SetUp = ({onStart}) => {
 
@@ -27,11 +28,37 @@ const Step1SetUp = ({onStart}) => {
   const [resumeText, setResumeText] = React.useState("");
   const [analysisDone, setAnalysisDone] = React.useState(false);
   const [analysing, setAnalysing] = React.useState(false);
+  const [analysisError, setAnalysisError] = React.useState("");
+  const [analysisWarning, setAnalysisWarning] = React.useState("");
+  const [startError, setStartError] = React.useState("");
+  const [showAuth, setShowAuth] = React.useState(false);
+  const uploadControllerRef = React.useRef(null);
+  const startControllerRef = React.useRef(null);
+  const isMountedRef = React.useRef(true);
+
+  React.useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      uploadControllerRef.current?.abort();
+      startControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleUploadResume = async () =>
   {
+    if (!userData) {
+      setShowAuth(true);
+      setAnalysisError("Please sign in to analyze your resume.");
+      return;
+    }
+
     if(!resumeFile || analysing) return;
       setAnalysing(true)
+      setAnalysisError("");
+      setAnalysisWarning("");
+      uploadControllerRef.current?.abort();
+      const controller = new AbortController();
+      uploadControllerRef.current = controller;
 
       const formdata = new FormData()
       formdata.append("resume", resumeFile);
@@ -39,51 +66,109 @@ const Step1SetUp = ({onStart}) => {
       const result = await axios.post(serverURL + "/api/interview/resume", formdata , {
         withCredentials: true,
         timeout: 45000,
+        signal: controller.signal,
       })
 
       console.log(result.data);
 
-      setRole(result.data.role || "");
-      setExperience(result.data.experience || "" );
+      if (!isMountedRef.current) return;
+
+      if (result.data.role && result.data.role !== "Not specified") {
+        setRole(result.data.role);
+      }
+      if (result.data.experience && result.data.experience !== "Not specified") {
+        setExperience(result.data.experience);
+      }
       setProjects(result.data.projects || []);
       setSkills(result.data.skills || []);
       setResumeText(result.data.resumeText || "");
+      setAnalysisWarning(result.data.analysisWarning || "");
       setAnalysisDone(true);
+      setStartError("");
 
     } catch (error) {
       console.log(error);
+      if (!isMountedRef.current || error?.code === "ERR_CANCELED") return;
       const status = error?.response?.status;
       const serverMessage = error?.response?.data?.message;
       const message = error?.code === "ECONNABORTED"
         ? "Request timed out. Please try again."
         : error?.message === "Network Error"
           ? "Network error while uploading resume. Please check your internet connection and try again."
-          : (serverMessage || error?.message || "Resume upload failed");
-      alert(status ? `Upload failed (${status}): ${message}` : message);
+          : status === 401
+            ? "Please sign in to upload and analyze your resume."
+            : (serverMessage || error?.message || "Resume upload failed");
+
+      if (status === 401) {
+        setShowAuth(true);
+      }
+
+      setAnalysisError(status ? `Upload failed (${status}): ${message}` : message);
       } finally {
-      setAnalysing(false)
+      if (isMountedRef.current) {
+        setAnalysing(false);
+      }
+      uploadControllerRef.current = null;
     }
   }
 
   const handleStart = async () => {
+    if (!userData) {
+      setShowAuth(true);
+      setStartError("Please sign in to start an interview.");
+      return;
+    }
+
+    const trimmedRole = role.trim();
+    const trimmedExperience = experience.trim();
+    if (!trimmedRole || !trimmedExperience) {
+      setStartError("Please enter both role and experience before starting.");
+      return;
+    }
+
+    if (analysing) {
+      setStartError("Resume analysis is still running. Please wait for it to complete.");
+      return;
+    }
+
+    setStartError("");
     setLoading(true);
+    startControllerRef.current?.abort();
+    const controller = new AbortController();
+    startControllerRef.current = controller;
     try {
       const result = await axios.post(serverURL + "/api/interview/generate-questions", 
         {
-        role, experience, mode, resumeText, projects, skills,
-      }, {withCredentials:true})
+        role: trimmedRole, experience: trimmedExperience, mode, resumeText, projects, skills,
+      }, {withCredentials:true, signal: controller.signal})
       console.log(result.data);
+      if (!isMountedRef.current) return;
       if(userData) {
         dispatch(setUserData({...userData , credits:result.data.creditsLeft}))
       }
-      setLoading(false);
 
       onStart({...result.data, username: userData?.username || userData?.name || "", gender})
 
     } catch (error) {
       console.log(error);
-      setLoading(false)
+      if (!isMountedRef.current || error?.code === "ERR_CANCELED") return;
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message;
+      const message = status === 401
+        ? "Please sign in to start your interview."
+        : serverMessage || error?.message || "Failed to start interview. Please try again.";
+
+      if (status === 401) {
+        setShowAuth(true);
+      }
+
+      setStartError(message);
       
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
+      startControllerRef.current = null;
     } 
   }
 
@@ -201,7 +286,12 @@ const Step1SetUp = ({onStart}) => {
                   type="file" 
                   id="resume-upload" 
                   className='hidden'
-                  onChange={(e) => setResumeFile(e.target.files[0])}
+                  onChange={(e) => {
+                    setResumeFile(e.target.files[0] || null);
+                    setAnalysisDone(false);
+                    setAnalysisError("");
+                    setAnalysisWarning("");
+                  }}
                   />
                   <p 
                   className='text-gray-500 font-medium'>
@@ -212,7 +302,8 @@ const Step1SetUp = ({onStart}) => {
                     <motion.button
                     whileHover={{ scale:1.02 }}
                     onClick={(e) => {e.stopPropagation(); handleUploadResume();}}
-                    className='mt-4 bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition'>
+                    disabled={analysing}
+                    className='mt-4 disabled:opacity-60 disabled:cursor-not-allowed bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition'>
                       {analysing ? "Analysing..." : "Analyse Resume"}
 
                     </motion.button>
@@ -221,15 +312,39 @@ const Step1SetUp = ({onStart}) => {
                 </motion.div>
               )}
 
+              {analysisError && (
+                <p className='text-sm text-red-600 -mt-2'>{analysisError}</p>
+              )}
+
+              {analysisWarning && (
+                <p className='text-sm text-amber-600 -mt-2'>{analysisWarning}</p>
+              )}
+
               {analysisDone && (
                 <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className='bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4'>
-                  <h3
-                  className='text-lg font-semibold text-gray-800'>
-                    Resume Analysis result
-                  </h3>
+                  <div className='flex items-center justify-between gap-3'>
+                    <h3
+                    className='text-lg font-semibold text-gray-800'>
+                      Resume Analysis result
+                    </h3>
+                    <button
+                    type="button"
+                    onClick={() => {
+                      setAnalysisDone(false);
+                      setResumeFile(null);
+                      setProjects([]);
+                      setSkills([]);
+                      setResumeText("");
+                      setAnalysisError("");
+                      setAnalysisWarning("");
+                    }}
+                    className='text-sm text-green-700 hover:text-green-800 font-medium'>
+                      Re-upload
+                    </button>
+                  </div>
 
                   {projects.length >0 &&(
                     <div>
@@ -258,15 +373,20 @@ const Step1SetUp = ({onStart}) => {
 
               <motion.button 
               onClick={handleStart}
-              disabled={!role || !experience || loading}
+              disabled={!role.trim() || !experience.trim() || loading}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
               className='w-full disabled:bg-gray-600 bg-green-600 hover:bg-green-700 text-white py-3 rounded-full text-lg font-semibold transition duration-300 shadow-md'>
                 {loading ? "Starting..." : "Start Interview"}
               </motion.button>
+              {startError && (
+                <p className='text-sm text-red-600 -mt-2'>{startError}</p>
+              )}
           </div>
         </motion.div>
       </div>
+
+      {showAuth && <AuthModel onClose={() => setShowAuth(false)} />}
       
     </motion.div>
   )
